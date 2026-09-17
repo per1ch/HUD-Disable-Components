@@ -78,13 +78,9 @@ local function captureConsoleLine(instance, ptable)
     sendLine(text)
 end
 
-Safe.PatchMethod("Barotrauma.DebugConsole", "NewMessage", nil,
-    captureConsoleLine, Hook.HookMethodType.Before)
-
--- Report unhandled Lua errors on this client too — these are exactly the
--- events an admin needs to see when a patch fails on someone's machine.
 Safe.AddHook("error", "HDC.RemoteConsole.MirrorErrors", function(err)
     sendLine("[LUA ERROR] " .. tostring(err))
 end)
+
 
 return RemoteConsole

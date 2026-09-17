@@ -33,21 +33,19 @@ local function enabled()
     return ClientState.Get(KEY)
 end
 
--- The spawn call, reached from VoipClient when someone speaks.
+-- Speaking bubble
 Safe.PatchMethod("Barotrauma.Character", "ShowTextlessSpeechBubble", nil, function(instance, ptable)
     if not enabled() then return end
     ptable.PreventExecution = true
 end, Hook.HookMethodType.Before)
 
--- The draw half: the field is read at the end of DrawFront, so clearing it
--- on the way in leaves nothing to draw.
+-- the field is read at the end of DrawFront
 Safe.PatchMethod("Barotrauma.Character", "DrawFront", nil, function(instance, ptable)
     if not enabled() then return end
     if instance == nil then return end
     Safe.Set(function() instance.textlessSpeechBubble = nil end)
 end, Hook.HookMethodType.Before)
 
--- Clear anything already queued while the toggle is on.
 Safe.AddHook("think", "HDC.VoiceBubbles.ClearQueued", function()
     if not enabled() then return end
     local characters = Safe.Get(function() return Character.CharacterList end)

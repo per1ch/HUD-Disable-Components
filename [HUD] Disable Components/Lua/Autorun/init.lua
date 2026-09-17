@@ -43,6 +43,8 @@ if SERVER then
     load("Server/RemoteConsole.lua")
     load("Server/Integrity.lua")
     load("Server/GiveInBlock.lua")
+    load("Server/Features/DisableRespawnTimerPacket.lua")
+    
 
     HDC.Safe.Log("server module loaded (v" .. HDC.Version .. ")")
     return
@@ -62,9 +64,6 @@ if CLIENT then
     load("Client/UI/PauseMenuButton.lua")
 
     -- Self-only commands (spec items 13 and 14)
-    load("Client/FullUIToggle.lua")
-    load("Client/CursorToggle.lua")
-
     -- Synced features, in spec order
     load("Client/Features/HealthBars.lua")       --  1
     load("Client/Features/PlayerNames.lua")      --  2
@@ -75,15 +74,17 @@ if CLIENT then
     load("Client/Features/ItemHighlights.lua")   --  7
     load("Client/Features/HealthMenuLock.lua")   --  8
     load("Client/Features/AltHighlightLock.lua") --  9
-    load("Client/Features/UpperHud.lua")         -- 10
+    -- load("Client/Features/UpperHud.lua")         -- 10
     load("Client/Features/GiveInButton.lua")     -- 11
     load("Client/Features/ChatNameLink.lua")     -- 12
     load("Client/Features/QuickMarkIcons.lua")   -- 15
     load("Client/Features/ChatMuteGlobal.lua")   -- 16 (global half)
     load("Client/Features/Camera.lua")           -- camera zoom / follow-cursor
     load("Client/Features/HideCharacterOrders.lua")
+    load("Client/Features/CrewManager.lua")
+    load("Client/Features/HideCursor.lua")
+    load("Client/Features/CrewListEntries.lua")
+    load("Client/Features/HideRespawnTimers.lua")
     
-    load("Client/Commands.lua")
-
     HDC.Safe.Log("client module loaded (v" .. HDC.Version .. ")")
 end

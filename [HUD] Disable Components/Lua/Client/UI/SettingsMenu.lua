@@ -45,9 +45,12 @@ local PALETTE = {
 local ui = {
     root      = nil,
     rows      = {},
+    allRows   = {},   -- ordered list of { key, frame, label, desc, type, widget }
     isOpen    = false,
     canEdit   = true,
     notice    = nil,
+    searchBox = nil,
+    searchQuery = "",
 }
 
 -- The client cannot see the server's permission table, so it optimistically
@@ -130,13 +133,11 @@ local function build()
         "[HUD] DISABLE COMPONENTS", nil, GUI.Style.LargeFont, GUI.Alignment.CenterLeft)
     title.RectTransform.RelativeOffset = Vector2(0.04, 0.022)
     Safe.Set(function() title.TextColor = PALETTE.title end)
-
     local subtitle = GUI.TextBlock(
         GUI.RectTransform(Vector2(0.88, 0.05), panel.RectTransform, GUI.Anchor.TopLeft),
         "Server-wide HUD policy", nil, nil, GUI.Alignment.CenterLeft)
     subtitle.RectTransform.RelativeOffset = Vector2(0.04, 0.100)
     Safe.Set(function() subtitle.TextColor = PALETTE.subtitle end)
-
     ui.notice = GUI.TextBlock(
         GUI.RectTransform(Vector2(0.88, 0.04), panel.RectTransform, GUI.Anchor.TopLeft),
         "", nil, nil, GUI.Alignment.CenterLeft)
@@ -146,16 +147,26 @@ local function build()
         ui.notice.CanBeFocused = false
     end)
 
+    local searchBox = GUI.TextBox(
+    GUI.RectTransform(Vector2(0.92, 0.050), panel.RectTransform, GUI.Anchor.TopLeft),
+    "")
+    searchBox.RectTransform.RelativeOffset = Vector2(0.04, 0.184)
+    Safe.Set(function()
+        searchBox.TextScale = 0.95
+        searchBox.TextColor = Color(220, 232, 240, 255)
+    end)
+    ui.searchBox = searchBox
+
     local separator = GUI.Frame(
         GUI.RectTransform(Vector2(0.92, 0.004), panel.RectTransform, GUI.Anchor.TopCenter),
         "GUIFrameListBox")
-    separator.RectTransform.RelativeOffset = Vector2(0, 0.186)
+    separator.RectTransform.RelativeOffset = Vector2(0, 0.244)
     Safe.Set(function() separator.Color = PALETTE.separator end)
 
     local listFrame = GUI.Frame(
-        GUI.RectTransform(Vector2(0.92, 0.560), panel.RectTransform, GUI.Anchor.TopCenter),
+        GUI.RectTransform(Vector2(0.92, 0.500), panel.RectTransform, GUI.Anchor.TopCenter),
         "GUIFrameListBox")
-    listFrame.RectTransform.RelativeOffset = Vector2(0, 0.203)
+    listFrame.RectTransform.RelativeOffset = Vector2(0, 0.261)
 
     local list = GUI.ListBox(
         GUI.RectTransform(Vector2(1, 1), listFrame.RectTransform, GUI.Anchor.Center), false)
@@ -201,14 +212,6 @@ local function build()
                 numberInput.valueStep     = entry.step or 0.05
                 numberInput.FloatValue    = ClientState.GetNumber(capturedKey)
             end)
-            -- OnValueChanged fires for programmatic writes as well as for
-            -- user edits, and Refresh() writes FloatValue on every policy
-            -- push from the server. Committing unconditionally therefore
-            -- made the server's own broadcast bounce straight back at it:
-            -- send -> broadcast -> Refresh -> OnValueChanged -> send, one
-            -- round trip per frame, for every client, until the menu closed.
-            -- Any change already present in ClientState is an echo of that
-            -- push, so it stops here.
             numberInput.OnValueChanged = function()
                 if not ui.canEdit then return end
                 local entered = Safe.Get(function() return numberInput.FloatValue end)
@@ -218,6 +221,13 @@ local function build()
             end
 
             ui.rows[entry.key] = { numberInput = numberInput, indicator = indicator }
+            table.insert(ui.allRows, {
+                key   = entry.key,
+                frame = row,
+                label = entry.label or "",
+                desc  = entry.desc  or "",
+                type  = entry.type  or "bool",
+            })
         else
             local toggle = GUI.Button(
                 GUI.RectTransform(Vector2(0.17, 0.62), row.RectTransform, GUI.Anchor.CenterRight),
@@ -233,10 +243,22 @@ local function build()
             end
 
             ui.rows[entry.key] = { toggle = toggle, indicator = indicator }
+            table.insert(ui.allRows, {
+                key   = entry.key,
+                frame = row,
+                label = entry.label or "",
+                desc  = entry.desc  or "",
+                type  = entry.type  or "bool",
+            })
         end
         updateRowVisual(entry.key)
     end
     list.RecalculateChildren()
+
+    searchBox.add_OnTextChanged(function(tb, text)
+        ui.searchQuery = text or ""
+        applySearchFilter()
+    end)
 
     local actionSeparator = GUI.Frame(
         GUI.RectTransform(Vector2(0.92, 0.004), panel.RectTransform, GUI.Anchor.BottomCenter),
@@ -247,11 +269,6 @@ local function build()
     local actionBar = GUI.Frame(
         GUI.RectTransform(Vector2(0.92, 0.148), panel.RectTransform, GUI.Anchor.BottomCenter), nil)
     actionBar.RectTransform.RelativeOffset = Vector2(0, -0.016)
-
-    -- Bulk actions apply to the on/off settings only. Sweeping the numeric
-    -- ones to true/false would be meaningless and would silently destroy a
-    -- configured zoom level. They still send a delta: only the keys they
-    -- actually touched, never a full snapshot.
     local function applyAllBools(value)
         local changes = {}
         for _, entry in ipairs(HDC.FeatureRegistry) do
@@ -263,7 +280,6 @@ local function build()
         end
         return changes
     end
-
     local enableAll = GUI.Button(
         GUI.RectTransform(Vector2(0.22, 0.82), actionBar.RectTransform, GUI.Anchor.CenterLeft),
         "Enable All", GUI.Alignment.Center, "GUIButton")
@@ -294,12 +310,10 @@ local function build()
         if HDC.RemoteConsoleUI ~= nil then HDC.RemoteConsoleUI.Open() end
         return true
     end
-
     local close = GUI.Button(
         GUI.RectTransform(Vector2(0.20, 0.82), actionBar.RectTransform, GUI.Anchor.CenterRight),
         "Close", GUI.Alignment.Center, "GUIButton")
     close.OnClicked = function() SettingsMenu.Close(); return true end
-
     ui.actionButtons = { enableAll, disableAll, close, consoleButton }
 end
 
@@ -310,7 +324,6 @@ local function applyEditability()
         ui.notice.Text = ui.canEdit and "" or
             "View only - you do not have permission to change these settings."
     end)
-
     for _, row in pairs(ui.rows) do
         if row.toggle ~= nil then
             Safe.Set(function() row.toggle.Enabled = ui.canEdit end)
@@ -325,6 +338,84 @@ local function applyEditability()
             ui.actionButtons[2].Enabled = ui.canEdit
         end)
     end
+end
+
+applySearchFilter = function()
+    local q = string.lower(ui.searchQuery or "")
+
+    -- Fuzzy subsequence matcher with scoring. Returns nil on no match,
+    -- otherwise a number where higher = better match. Bonuses:
+    --   +12  matched at start of string
+    --   +10  matched at a word boundary (after space / _ / - / . / /)
+    --    +8  matched immediately after the previous match (consecutive)
+    --   +0..20  matches earlier in the target rank higher
+    --   -len/4  shorter targets outrank longer ones on ties
+    local function fuzzyScore(target, needle)
+        if needle == "" then return 0 end
+        if target == nil or target == "" then return nil end
+        local t   = string.lower(target)
+        local tn, nn = #t, #needle
+        if nn > tn then return nil end
+
+        local score     = 0
+        local ti        = 1
+        local prevMatch = -2
+        for ni = 1, nn do
+            local c = needle:sub(ni, ni)
+            local found = nil
+            while ti <= tn do
+                if t:sub(ti, ti) == c then
+                    found = ti
+                    break
+                end
+                ti = ti + 1
+            end
+            if found == nil then return nil end
+
+            if found == prevMatch + 1 then
+                score = score + 8
+            end
+            if found == 1 then
+                score = score + 12
+            else
+                local prev = t:sub(found - 1, found - 1)
+                if prev == " " or prev == "_" or prev == "-"
+                   or prev == "." or prev == "/" then
+                    score = score + 10
+                end
+            end
+            score = score + math.max(0, 20 - found)
+            prevMatch = found
+            ti = found + 1
+        end
+        score = score - math.floor(tn / 4)
+        return score
+    end
+
+    -- Score every row against label, description and key; keep the best.
+    for _, r in ipairs(ui.allRows) do
+        local best = nil
+        local function consider(s)
+            local sc = fuzzyScore(s, q)
+            if sc ~= nil and (best == nil or sc > best) then
+                best = sc
+            end
+        end
+        consider(r.label)
+        consider(r.desc)
+        consider(r.key)
+
+        local visible = (q == "") or (best ~= nil)
+        Safe.Set(function() r.frame.Visible = visible end)
+    end
+
+    -- Collapse any empty space left by hidden rows.
+    Safe.Set(function()
+        local content = ui.allRows[1] ~= nil and ui.allRows[1].frame.Parent
+        if content ~= nil and content.Recalculate ~= nil then
+            content.Recalculate()
+        end
+    end)
 end
 
 function SettingsMenu.Open()
@@ -348,8 +439,6 @@ function SettingsMenu.IsOpen()
     return ui.isOpen
 end
 
--- The menu lives outside the normal screen hierarchy, so it has to add
--- itself to the GUI update list each frame while visible.
 local function addToUpdateList()
     if ui.root == nil or ui.root.Visible ~= true then return end
     local added = Safe.Set(function() ui.root.AddToGUIUpdateList(false, 999) end)
@@ -362,8 +451,9 @@ Safe.PatchMethod("Barotrauma.GameSession", "AddToGUIUpdateList", nil,
 Safe.PatchMethod("Barotrauma.GameScreen", "AddToGUIUpdateList", nil,
     function() addToUpdateList() end, Hook.HookMethodType.After)
 
--- Keep visuals honest when the server pushes a change while the menu is
--- open (e.g. another admin edits the policy).
+Safe.PatchMethod("Barotrauma.NetLobbyScreen", "AddToGUIUpdateList", nil,
+    function() addToUpdateList() end, Hook.HookMethodType.After)
+
 ClientState.AddChangeListener(function()
     if ui.root ~= nil then SettingsMenu.Refresh() end
 end)

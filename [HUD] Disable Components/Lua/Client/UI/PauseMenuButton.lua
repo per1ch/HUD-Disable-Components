@@ -77,11 +77,11 @@ local function ensureButton()
     if container ~= nil then
         state.button = GUI.Button(
             GUI.RectTransform(Vector2(1, 0.09), container.RectTransform),
-            "[HUD] Disable Components", GUI.Alignment.Center, "GUIButtonSmall")
+            "Disable Components", GUI.Alignment.Center, "GUIButtonSmall")
     else
         state.button = GUI.Button(
             GUI.RectTransform(Vector2(0.48, 0.065), pauseMenu.RectTransform, GUI.Anchor.BottomCenter),
-            "[HUD] Disable Components", GUI.Alignment.Center, "GUIButtonSmall")
+            "Disable Components", GUI.Alignment.Center, "GUIButtonSmall")
     end
 
     state.button.OnClicked = function()

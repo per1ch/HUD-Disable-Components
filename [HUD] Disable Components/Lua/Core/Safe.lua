@@ -127,4 +127,16 @@ function Safe.WalkComponents(root, visitFn)
         end
     end
 end
+
+function Safe.HookUpdateList(addToUpdateList)
+    if type(addToUpdateList) ~= "function" then return end
+    local handler = function() addToUpdateList() end
+    Safe.PatchMethod("Barotrauma.GameSession",    "AddToGUIUpdateList", nil,
+        handler, Hook.HookMethodType.After)
+    Safe.PatchMethod("Barotrauma.GameScreen",     "AddToGUIUpdateList", nil,
+        handler, Hook.HookMethodType.After)
+    Safe.PatchMethod("Barotrauma.NetLobbyScreen", "AddToGUIUpdateList", nil,
+        handler, Hook.HookMethodType.After)
+end
+
 return Safe

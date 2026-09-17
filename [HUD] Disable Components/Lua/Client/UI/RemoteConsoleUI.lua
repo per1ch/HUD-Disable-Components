@@ -294,4 +294,11 @@ Safe.PatchMethod("Barotrauma.GameSession", "AddToGUIUpdateList", nil,
 Safe.PatchMethod("Barotrauma.GameScreen", "AddToGUIUpdateList", nil,
     function() addToUpdateList() end, Hook.HookMethodType.After)
 
+Safe.PatchMethod("Barotrauma.NetLobbyScreen", "AddToGUIUpdateList", nil,
+    function() addToUpdateList() end, Hook.HookMethodType.After)
+
+ClientState.AddChangeListener(function()
+    if ui.root ~= nil then SettingsMenu.Refresh() end
+end)
+
 return RemoteConsoleUI

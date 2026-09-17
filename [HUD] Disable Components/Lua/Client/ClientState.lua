@@ -58,10 +58,6 @@ function ClientState.GetNumber(key)
     return tonumber(ClientState.Get(key)) or 0
 end
 
-function ClientState.GetLocal(key)
-    return ClientState.Local[key] == true
-end
-
 function ClientState.SetLocal(key, value)
     if ClientState.Local[key] == nil then return false end
     ClientState.Local[key] = (value == true)

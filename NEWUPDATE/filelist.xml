@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<contentpackage name="[HUD] Disable Components" corepackage="false" modversion="1.0.0" gameversion="1.0.0">
-    <Item file="%ModDir%/dummy.xml" />
-</contentpackage>

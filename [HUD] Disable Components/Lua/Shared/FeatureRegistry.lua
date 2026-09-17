@@ -30,21 +30,28 @@
 HDC = HDC or {}
 
 HDC.FeatureRegistry = {
-    { key = "HideHealthBars",     type = "bool", label = "Health bars",           desc = "Hides HP bars floating above characters." },
-    { key = "HidePlayerNames",    type = "bool", label = "Player names",          desc = "Hides names above characters, in the health scanner readout, and in the health menu." },
-    { key = "HideSkillXpPopups",  type = "bool", label = "Skill / XP popups",     desc = "Hides the floating skill-up and experience-gain notices." },
-    { key = "HideChatBubbles",    type = "bool", label = "Chat bubbles",          desc = "Hides the speech bubble shown above a character typing in chat." },
-    { key = "HideVoiceBubbles",   type = "bool", label = "Voice bubbles",         desc = "Hides the microphone/voice-chat bubble shown above other characters." },
-    { key = "HidePrivilegeIcon",  type = "bool", label = "Privilege / host icon", desc = "Removes the host/permission icon next to names in the player list." },
-    { key = "HideItemHighlights", type = "bool", label = "Item highlights",       desc = "Hides the selection outline drawn on interactable items." },
-    { key = "LockHealthMenu",     type = "bool", label = "Own health menu",      desc = "Stops a player opening their own health menu. Other players' health menus still open normally, so medics keep working." },
-    { key = "LockAltOverlay",     type = "bool", label = "Alt highlight overlay", desc = "Disables the name/tooltip highlight overlay shown while holding Alt." },
-    { key = "HideUpperHud",       type = "bool", label = "Upper HUD & timers",    desc = "Hides the crew status panel and the respawn/round-end timers (use !alive to check crew status)." },
-    { key = "DisableGiveIn",      type = "bool", label = "\"Give In\" button",    desc = "Makes the Give In (suicide) button non-functional." },
-    { key = "HideChatNameLink",   type = "bool", label = "Chat name links",       desc = "Removes the clickable player-profile link on chat names." },
-    { key = "HideQuickMarkIcons", type = "bool", label = "Quick-mark icons",      desc = "Hides fire/breach/etc. icon markers next to chat, leaving the messages themselves visible." },
-    { key = "MuteChatGlobal",     type = "bool", label = "Chat (all players)",    desc = "Blocks chat for every player, the same as a manual spam-block." },
-    { key = "HideCursor",         type = "bool", label = "Hide Cursor",           desc = "Hide cursor for players who control a character and not in the Escape menu." },
+    { key = "CrewManager",        type = "bool", label = "CrewManager",                     desc = "Disables CrewManager execution." },
+    { key = "HideRespawnTimers",  type = "bool", label = "Hide respawn timers",             desc = "Hides the respawn countdown and shuttle-leaving timer, on the server side."},
+    { key = "DisableRespawnTimerPacket",  type = "bool", label = "DisableRespawnTimerPacket",             desc = "Hides the respawn countdown and shuttle-leaving timer, on the server side."},
+
+    { key = "HideHealthBars",     type = "bool", label = "Health bars",                     desc = "Hides HP bars floating above characters." },
+    { key = "HidePlayerNames",    type = "bool", label = "Player names",                    desc = "Hides names above characters, in the health scanner readout, and in the health menu." },
+    { key = "HideSkillXpPopups",  type = "bool", label = "Skill / XP popups",               desc = "Hides the floating skill-up and experience-gain notices." },
+    { key = "HideChatBubbles",    type = "bool", label = "Chat bubbles",                    desc = "Hides the speech bubble shown above a character typing in chat." },
+    { key = "HideVoiceBubbles",   type = "bool", label = "Voice bubbles",                   desc = "Hides the microphone/voice-chat bubble shown above other characters." },
+    { key = "HidePrivilegeIcon",  type = "bool", label = "Privilege / host icon",           desc = "Removes the host/permission icon next to names in the player list." },
+    { key = "HideItemHighlights", type = "bool", label = "Item highlights",                 desc = "Hides the selection outline drawn on interactable items." },
+    { key = "LockHealthMenu",     type = "bool", label = "Own health menu",                 desc = "Stops a player opening their own health menu. Other players' health menus still open normally, so medics keep working." },
+    { key = "LockAltOverlay",     type = "bool", label = "Alt highlight overlay",           desc = "Disables the name/tooltip highlight overlay shown while holding Alt." },
+    { key = "HideUpperHud",       type = "bool", label = "Upper HUD & timers",              desc = "Hides the crew status panel and the respawn/round-end timers (use !alive to check crew status)." },
+    { key = "DisableGiveIn",      type = "bool", label = "\"Give In\" button",              desc = "Makes the Give In (suicide) button non-functional." },
+    { key = "HideChatNameLink",   type = "bool", label = "Chat name links",                 desc = "Removes the clickable player-profile link on chat names." },
+    { key = "HideQuickMarkIcons", type = "bool", label = "Quick-mark icons",                desc = "Hides fire/breach/etc. icon markers next to chat, leaving the messages themselves visible." },
+    { key = "ChatMuteGlobal",     type = "bool", label = "Chat (all players)",              desc = "Blocks chat for every player, the same as a manual spam-block." },
+    { key = "HideCursor",         type = "bool", label = "Hide Cursor",                     desc = "Hide cursor for players who control a character and not in the Escape menu." },
+    
+    -- { key = "CrewListEntries",    type = "bool", label = "Hide Crew List",                  desc = "Hide living players from TAB" },
+    -- { key = "CrewList",           type = "bool", label = "CrewList",                        desc = "Hide living players from TAB" },
 
     -- Camera controls
     { key = "LockCameraZoom",      type = "bool",  label = "Lock camera zoom",       desc = "Forces every player's camera to the zoom level set below." },
