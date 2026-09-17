@@ -30,7 +30,7 @@
 HDC = HDC or {}
 
 HDC.FeatureRegistry = {
-    { key = "CrewManager",        type = "bool", label = "CrewManager",                     desc = "Disables CrewManager execution." },
+    { key = "CrewManager",        type = "bool", label = "CrewManager",                     desc = "Disables the crew command interface and blocks giving orders, enforced server-side." },
     { key = "HideRespawnTimers",  type = "bool", label = "Hide respawn timers",             desc = "Hides the respawn countdown and shuttle-leaving timer, on the server side."},
     { key = "DisableRespawnTimerPacket",  type = "bool", label = "DisableRespawnTimerPacket",             desc = "Hides the respawn countdown and shuttle-leaving timer, on the server side."},
 
@@ -41,7 +41,7 @@ HDC.FeatureRegistry = {
     { key = "HideVoiceBubbles",   type = "bool", label = "Voice bubbles",                   desc = "Hides the microphone/voice-chat bubble shown above other characters." },
     { key = "HidePrivilegeIcon",  type = "bool", label = "Privilege / host icon",           desc = "Removes the host/permission icon next to names in the player list." },
     { key = "HideItemHighlights", type = "bool", label = "Item highlights",                 desc = "Hides the selection outline drawn on interactable items." },
-    { key = "LockHealthMenu",     type = "bool", label = "Own health menu",                 desc = "Stops a player opening their own health menu. Other players' health menus still open normally, so medics keep working." },
+    { key = "LockHealthMenu",     type = "bool", label = "Own health menu",                 desc = "Blocks self-treatment server-side and stops opening your own health menu. Other players' health menus still open normally, so medics keep working." },
     { key = "LockAltOverlay",     type = "bool", label = "Alt highlight overlay",           desc = "Disables the name/tooltip highlight overlay shown while holding Alt." },
     { key = "HideUpperHud",       type = "bool", label = "Upper HUD & timers",              desc = "Hides the crew status panel and the respawn/round-end timers (use !alive to check crew status)." },
     { key = "DisableGiveIn",      type = "bool", label = "\"Give In\" button",              desc = "Makes the Give In (suicide) button non-functional." },

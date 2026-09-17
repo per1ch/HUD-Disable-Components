@@ -19,7 +19,7 @@ Settings list (the in-game menu, in order)
   HideVoiceBubbles     5   Voice-chat bubble above other characters
   HidePrivilegeIcon    6   Host/permission icon in the tab player list
   HideItemHighlights   7   Selection outline on interactable items
-  LockHealthMenu       8   Makes the health menu non-interactive
+  LockHealthMenu       8   Blocks self-treatment (server-side) and your own health menu
   LockAltOverlay       9   Alt-held name/tooltip highlight overlay
   HideUpperHud        10   Crew status panel + respawn/round-end timers
   DisableGiveIn       11   Makes the "Give In" button non-functional

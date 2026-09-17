@@ -128,6 +128,36 @@ function Safe.WalkComponents(root, visitFn)
     end
 end
 
+-- SERVER only. Finds the connected Client controlling the given Character,
+-- or nil for a bot / disconnected character. Used to turn a server-side
+-- block into a direct message to the player it actually affected.
+function Safe.FindClientByCharacter(character)
+    if character == nil then return nil end
+    local clients = Safe.Get(function() return Client.ClientList end)
+    if clients == nil then return nil end
+    for _, client in pairs(clients) do
+        if Safe.Get(function() return client.Character end) == character then
+            return client
+        end
+    end
+    return nil
+end
+
+-- SERVER only. Sends a system-style chat line to one client, trying the
+-- ChatMessage.Create overload first and falling back to the older
+-- positional Game.SendDirectChatMessage signature some builds expect.
+function Safe.SendDirectMessage(client, text)
+    if client == nil or text == nil then return false end
+    local sent = Safe.Set(function()
+        local message = ChatMessage.Create("", text, ChatMessageType.Server, nil, nil)
+        Game.SendDirectChatMessage(message, client)
+    end)
+    if sent then return true end
+    return Safe.Set(function()
+        Game.SendDirectChatMessage("", text, nil, ChatMessageType.Server, client)
+    end)
+end
+
 function Safe.HookUpdateList(addToUpdateList)
     if type(addToUpdateList) ~= "function" then return end
     local handler = function() addToUpdateList() end
