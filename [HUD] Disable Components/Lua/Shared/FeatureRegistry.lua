@@ -47,7 +47,7 @@ HDC.FeatureRegistry = {
     { key = "DisableGiveIn",      type = "bool", label = "\"Give In\" button",              desc = "Makes the Give In (suicide) button non-functional." },
     { key = "HideChatNameLink",   type = "bool", label = "Chat name links",                 desc = "Removes the clickable player-profile link on chat names." },
     { key = "HideQuickMarkIcons", type = "bool", label = "Quick-mark icons",                desc = "Hides fire/breach/etc. icon markers next to chat, leaving the messages themselves visible." },
-    { key = "ChatMuteGlobal",     type = "bool", label = "Chat (all players)",              desc = "Blocks chat for every player, the same as a manual spam-block." },
+    { key = "ChatMuteGlobal",     type = "bool", label = "Chat (all players)",              desc = "Blocks chat for every living player. Spectators, dead players, and command messages are exempt." },
     { key = "HideCursor",         type = "bool", label = "Hide Cursor",                     desc = "Hide cursor for players who control a character and not in the Escape menu." },
     
     -- { key = "CrewListEntries",    type = "bool", label = "Hide Crew List",                  desc = "Hide living players from TAB" },

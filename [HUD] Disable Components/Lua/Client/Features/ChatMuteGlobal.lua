@@ -1,4 +1,13 @@
---rework to make it to just completely disable anyone from receiving chat messages (by server-side)
+-- Lua/Client/Features/ChatMuteGlobal.lua — CLIENT
+--
+-- Visual/interactive half of the global mute: hides and disables the
+-- local chat box so a muted player cannot even try to type. The real
+-- enforcement is server-side (Server/Moderation.lua drops the message
+-- before broadcast), so this is belt-and-braces, not the source of truth
+-- — a modified client can ignore it and still gets dropped server-side.
+--
+-- Spectators and dead players are exempt, matching the server-side rule:
+-- the global toggle locks down the living round, not the whole server.
 
 HDC = HDC or {}
 
@@ -7,8 +16,16 @@ local ClientState = HDC.ClientState
 
 local KEY = "ChatMuteGlobal"
 
+local function isSpectatorOrDead()
+    return Safe.Get(function()
+        local c = Character.Controlled
+        return c == nil or c.IsDead == true
+    end) == true
+end
+
 local function enabled()
-    return ClientState.Get(KEY)
+    if ClientState.Get(KEY) ~= true then return false end
+    return not isSpectatorOrDead()
 end
 
 local chatBoxType = nil

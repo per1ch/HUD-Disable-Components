@@ -78,7 +78,7 @@ if CLIENT then
     load("Client/Features/GiveInButton.lua")     -- 11
     load("Client/Features/ChatNameLink.lua")     -- 12
     load("Client/Features/QuickMarkIcons.lua")   -- 15
-    load("Client/Features/ChatMuteGlobal.lua")   -- 16 (global half)
+    load("Client/Features/ChatMuteGlobal.lua")   -- 16 (client-side chatbox half)
     load("Client/Features/Camera.lua")           -- camera zoom / follow-cursor
     load("Client/Features/HideCharacterOrders.lua")
     load("Client/Features/CrewManager.lua")
