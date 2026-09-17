@@ -26,6 +26,7 @@ Settings list (the in-game menu, in order)
   HideChatNameLink    12   Clickable player-profile link on chat names
   HideQuickMarkIcons  15   Fire/breach/etc. icons beside chat (messages stay)
   ChatMuteGlobal      16   Blocks chat for every living player (spectators, dead players, and commands are exempt)
+  CrewListEntries          Hides the crew roster from living players in TAB (spectators/dead still see it)
 
   LockCameraZoom           Forces every client to the zoom level below
   CameraZoomLevel          Numeric, 0.3 - 3.0, default 1.0

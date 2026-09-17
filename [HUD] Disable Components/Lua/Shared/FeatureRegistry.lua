@@ -50,8 +50,7 @@ HDC.FeatureRegistry = {
     { key = "ChatMuteGlobal",     type = "bool", label = "Chat (all players)",              desc = "Blocks chat for every living player. Spectators, dead players, and command messages are exempt." },
     { key = "HideCursor",         type = "bool", label = "Hide Cursor",                     desc = "Hide cursor for players who control a character and not in the Escape menu." },
     
-    -- { key = "CrewListEntries",    type = "bool", label = "Hide Crew List",                  desc = "Hide living players from TAB" },
-    -- { key = "CrewList",           type = "bool", label = "CrewList",                        desc = "Hide living players from TAB" },
+    { key = "CrewListEntries",    type = "bool", label = "Crew list (TAB)",                 desc = "Hides the crew roster from living players in the TAB menu. Spectators and dead players still see it." },
 
     -- Camera controls
     { key = "LockCameraZoom",      type = "bool",  label = "Lock camera zoom",       desc = "Forces every player's camera to the zoom level set below." },
