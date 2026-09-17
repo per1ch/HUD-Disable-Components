@@ -32,7 +32,7 @@ HDC = HDC or {}
 HDC.FeatureRegistry = {
     { key = "CrewManager",        type = "bool", label = "CrewManager",                     desc = "Disables the crew command interface and blocks giving orders, enforced server-side." },
     { key = "HideRespawnTimers",  type = "bool", label = "Hide respawn timers",             desc = "Hides the respawn countdown and shuttle-leaving timer, on the server side."},
-    { key = "DisableRespawnTimerPacket",  type = "bool", label = "DisableRespawnTimerPacket",             desc = "Hides the respawn countdown and shuttle-leaving timer, on the server side."},
+    { key = "DisableRespawnTimerPacket",  type = "bool", label = "DisableRespawnTimerPacket",             desc = "Hides the respawn countdown and shuttle-leaving timer from living players, server-side. Spectators and dead players still see it."},
 
     { key = "HideHealthBars",     type = "bool", label = "Health bars",                     desc = "Hides HP bars floating above characters." },
     { key = "HidePlayerNames",    type = "bool", label = "Player names",                    desc = "Hides names above characters, in the health scanner readout, and in the health menu." },

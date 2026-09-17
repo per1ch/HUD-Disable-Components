@@ -1,14 +1,22 @@
--- Lua/Server/Features/RespawnTimers.lua — SERVER
+-- Lua/Server/Features/DisableRespawnTimerPacket.lua — SERVER
 -- Suppress the respawn / shuttle countdown and the round-end countdown
--- without touching server-side respawn or round logic.
+-- for living players only — spectators and dead players still see them,
+-- since they're the ones actually waiting to respawn.
 --
--- The RespawnManager half of this file masks two flags only during the
--- outbound packet write and restores them immediately afterwards, so the
--- server's own update loop keeps seeing the real state.
+-- The RespawnManager half of this file masks two flags only in the
+-- packet written to a living recipient, restoring them immediately
+-- afterwards so the server's own update loop, and every spectator/dead
+-- client, keep seeing the real state. ServerEventWrite runs once per
+-- connected client with that client passed in, which is what makes the
+-- per-recipient scoping possible (confirmed against the game's own
+-- source: `ServerEventWrite(IWriteMessage msg, Client c, ...)`).
 --
 -- The round-end half filters by content: any message routed through
 -- GUI.AddMessage, or any visible GUITextBlock, whose text matches the
--- pattern list is suppressed.
+-- pattern list is suppressed. That GUI only exists on whichever machine
+-- is running this code (a listen/host server), so the same "living
+-- players only" rule is applied to that machine's own controlled
+-- character instead of a network recipient.
 
 print("[HDC] RespawnTimers.lua loaded")
 
@@ -21,6 +29,19 @@ local KEY = "DisableRespawnTimerPacket"
 -- Server-side policy read. ClientState is client-only and is nil here;
 -- the authoritative store on the server is ServerState (see Sync.lua).
 local function enabled() return ServerState.Get(KEY) == true end
+
+local function isSpectatorOrDead(client)
+    local character = Safe.Get(function() return client.Character end)
+    if character == nil then return true end -- spectating / not spawned
+    return Safe.Get(function() return character.IsDead end) == true
+end
+
+local function localCharacterIsSpectatorOrDead()
+    return Safe.Get(function()
+        local c = Character.Controlled
+        return c == nil or c.IsDead == true
+    end) == true
+end
 
 -- Patterns are matched case-insensitively and as plain substrings.
 -- Extend the list if your build phrases the countdown differently.
@@ -59,9 +80,16 @@ Safe.MakeFieldAccessible("Barotrauma.Networking.RespawnManager", "teamSpecificSt
 
 Safe.PatchMethod("Barotrauma.Networking.RespawnManager", "ServerEventWrite", nil,
     function(instance, ptable)
-        print("[HDC] ServerEventWrite fired, enabled =", tostring(enabled()))
         if not enabled() then return end
         if instance == nil then return end
+
+        -- ServerEventWrite runs once per recipient; Args[1] is that
+        -- recipient (Client). Only mask the countdown in the packet a
+        -- living player receives, so spectators/dead players still see
+        -- the real timer.
+        local recipient = Safe.Get(function() return ptable.Args[1] end)
+        if recipient == nil or isSpectatorOrDead(recipient) then return end
+
         local saved = {}
         Safe.Set(function()
             for key, state in pairs(instance.teamSpecificStates) do
@@ -95,7 +123,7 @@ Safe.PatchMethod("Barotrauma.Networking.RespawnManager", "ServerEventWrite", nil
 -- All GUI.AddMessage overloads funnel through this signature, so one patch
 -- catches both the string form and the LocalizedString form.
 Safe.PatchMethod("Barotrauma.GUI", "AddMessage", nil, function(instance, ptable)
-    if not enabled() then return end
+    if not enabled() or localCharacterIsSpectatorOrDead() then return end
     local msg = ptable.Args[0]
     if msg ~= nil and matches(tostring(msg)) then
         ptable.PreventExecution = true
@@ -107,7 +135,7 @@ end, Hook.HookMethodType.Before)
 -- Some builds hold the countdown in a long-lived text block rather than
 -- re-adding it via GUI.AddMessage every tick. Blank any that match.
 Safe.AddHook("think", "HDC.RespawnTimers.HideRoundEndText", function()
-    if not enabled() then return end
+    if not enabled() or localCharacterIsSpectatorOrDead() then return end
     Safe.Set(function()
         local canvas = GUI.Canvas
         if canvas == nil then return end
