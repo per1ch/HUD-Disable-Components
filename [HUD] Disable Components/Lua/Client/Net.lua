@@ -9,7 +9,7 @@
 --
 -- EDITS ARE DELTAS
 -- Net.RequestPolicyChange expects a table containing only the keys the
--- user just changed, e.g. { MuteChatGlobal = true }. Sending a full
+-- user just changed, e.g. { ChatMuteGlobal = true }. Sending a full
 -- snapshot causes two admins editing different settings to overwrite each
 -- other's changes with stale values carried in their own snapshot. The
 -- server treats the payload as a patch, so deltas are the correct shape.

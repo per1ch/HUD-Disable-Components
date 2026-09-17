@@ -1,7 +1,7 @@
 -- Lua/Server/Moderation.lua — SERVER
 --
 -- Spec item 16, per-player half: silence one named player's chat via a
--- command, independently of the global MuteChatGlobal toggle.
+-- command, independently of the global ChatMuteGlobal toggle.
 --
 -- Enforcement happens here on the server — a muted player's messages are
 -- dropped before they are ever broadcast, rather than asking clients to
@@ -50,7 +50,7 @@ end
 
 function Moderation.IsMuted(client)
     if client == nil then return false end
-    if ServerState.Get("MuteChatGlobal") then return true end
+    if ServerState.Get("ChatMuteGlobal") then return true end
     local key = accountKey(client)
     return key ~= nil and mutedAccounts[key] == true
 end
@@ -117,7 +117,7 @@ Safe.AddCommand("hdc_unmute", "Un-mute one player's chat. Usage: hdc_unmute <pla
 
 Safe.AddCommand("hdc_mutelist", "List players currently muted by [HUD] Disable Components.",
     function()
-        if ServerState.Get("MuteChatGlobal") then
+        if ServerState.Get("ChatMuteGlobal") then
             print("[HDC] Global chat mute is ON — every player is muted.")
         end
         local any = false
