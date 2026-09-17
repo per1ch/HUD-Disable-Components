@@ -44,7 +44,8 @@ if SERVER then
     load("Server/Integrity.lua")
     load("Server/GiveInBlock.lua")
     load("Server/Features/DisableRespawnTimerPacket.lua")
-    
+    load("Server/Features/ChatMuteGlobal.lua")
+
 
     HDC.Safe.Log("server module loaded (v" .. HDC.Version .. ")")
     return

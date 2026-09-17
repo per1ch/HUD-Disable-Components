@@ -1,7 +1,8 @@
 -- Lua/Server/Moderation.lua — SERVER
 --
 -- Spec item 16, per-player half: silence one named player's chat via a
--- command, independently of the global ChatMuteGlobal toggle.
+-- command, independently of the global ChatMuteGlobal toggle (the global
+-- half lives in Server/Features/ChatMuteGlobal.lua).
 --
 -- Enforcement happens here on the server — a muted player's messages are
 -- dropped before they are ever broadcast, rather than asking clients to
@@ -48,41 +49,10 @@ local function findClientByName(name)
     return exact or partial
 end
 
-local function isSpectatorOrDead(client)
-    local character = Safe.Get(function() return client.Character end)
-    if character == nil then return true end -- spectating / not spawned
-    return Safe.Get(function() return character.IsDead end) == true
-end
-
--- The chatMessage hook hands over a ChatMessage object in some LuaCs
--- versions and a plain string in others, so read both shapes.
-local function messageText(message)
-    local text = Safe.Get(function() return tostring(message.Text) end)
-    if text ~= nil and text ~= "" then return text end
-    return Safe.Get(function() return tostring(message) end)
-end
-
--- A leading punctuation character (!, /, etc.) marks a command rather than
--- a chat line, e.g. "!alive" — the global mute must not eat those, or
--- spectators/admins lose commands along with their chat.
-local function looksLikeCommand(text)
-    return text ~= nil and text:match("^%s*%p") ~= nil
-end
-
--- An individual hdc_mute is a targeted moderator action and always
--- applies. The global toggle is a blunt "lock the round chat" switch, so
--- it exempts spectators/dead players (who aren't part of the round being
--- locked down) and command text.
-function Moderation.IsMuted(client, text)
+function Moderation.IsMuted(client)
     if client == nil then return false end
-
     local key = accountKey(client)
-    if key ~= nil and mutedAccounts[key] == true then return true end
-
-    if not ServerState.Get("ChatMuteGlobal") then return false end
-    if looksLikeCommand(text) then return false end
-    if isSpectatorOrDead(client) then return false end
-    return true
+    return key ~= nil and mutedAccounts[key] == true
 end
 
 function Moderation.SetMuted(client, muted)
@@ -96,7 +66,7 @@ end
 -- game the message was handled, which suppresses it.
 Safe.AddHook("chatMessage", "HDC.Moderation.FilterChat", function(message, sender)
     if sender == nil then return end
-    if Moderation.IsMuted(sender, messageText(message)) then return true end
+    if Moderation.IsMuted(sender) then return true end
 end)
 
 local function requirePermission(client)

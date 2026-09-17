@@ -1,14 +1,14 @@
--- tests/moderation_mute_test.lua
+-- tests/chat_mute_test.lua
 --
--- Run:  lua tests/moderation_mute_test.lua
+-- Run:  lua tests/chat_mute_test.lua
 --
--- Guards the ChatMuteGlobal rework: the global toggle must silence living
--- players' broadcast chat but leave spectators, dead players, and
--- command-shaped text (e.g. "!alive") untouched, while a targeted
--- hdc_mute still blocks everything from its target. Loads the real
--- Core/Safe.lua and Server/Moderation.lua; Hook/Game/ServerState are
--- stand-ins since neither the Barotrauma API nor persistence is available
--- outside the game.
+-- Guards the split ChatMuteGlobal feature: Server/Features/ChatMuteGlobal.lua
+-- owns the global toggle (living players muted, spectators/dead/commands
+-- exempt) and Server/Moderation.lua owns the independent per-player mute.
+-- Both hook the same "chatMessage" event, exactly as they do when the mod
+-- loads for real, so this drives every registered hook the way the game
+-- would. Hook/Game/ServerState are stand-ins since neither the Barotrauma
+-- API nor persistence is available outside the game.
 
 local ROOT = "[HUD] Disable Components/Lua/"
 
@@ -34,10 +34,18 @@ HDC.Permissions = { CanEditPolicy = function() return false end }
 Game = { AddCommand = function() end }
 
 dofile(ROOT .. "Server/Moderation.lua")
+dofile(ROOT .. "Server/Features/ChatMuteGlobal.lua")
 
-local Moderation  = HDC.Moderation
-local filterChat  = hooks.chatMessage["HDC.Moderation.FilterChat"]
-assert(filterChat ~= nil, "FilterChat hook did not register")
+local Moderation = HDC.Moderation
+
+-- Fires every registered chatMessage hook, the way the real event does:
+-- the message is dropped if any subscriber returns true.
+local function blocked(text, who)
+    for _, callback in pairs(hooks.chatMessage) do
+        if callback({ Text = text }, who) == true then return true end
+    end
+    return false
+end
 
 local function client(opts)
     opts = opts or {}
@@ -51,10 +59,6 @@ local function client(opts)
         Name      = opts.name or "Player",
         Character = character,
     }
-end
-
-local function blocked(text, who)
-    return filterChat({ Text = text }, who) == true
 end
 
 -- Global mute off: nobody is filtered.
@@ -74,7 +78,8 @@ assert(not blocked("hello", client({ dead = true })), "dead players must not be 
 assert(not blocked("!alive", client()), "commands must pass through the global mute")
 assert(not blocked("  /alive", client()), "commands must pass even with leading whitespace")
 
--- A per-player hdc_mute is unconditional: it overrides every exemption.
+-- A per-player hdc_mute (Moderation.lua) is unconditional and independent
+-- of the global toggle: it overrides every exemption above.
 globalMuteOn = false
 local troll = client({ steamId = 111 })
 Moderation.SetMuted(troll, true)
@@ -83,4 +88,4 @@ assert(blocked("!alive", troll), "an individual mute blocks commands too")
 Moderation.SetMuted(troll, false)
 assert(not blocked("hello", troll), "un-muting must restore normal chat")
 
-print("moderation_mute_test: ok")
+print("chat_mute_test: ok")
